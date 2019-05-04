@@ -1,0 +1,93 @@
+//
+// Created by Miguel Chan on 2019-04-10.
+//
+
+#include "ColoredCube.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <GLFW/glfw3.h>
+#include <ctime>
+
+ColoredCube::~ColoredCube() = default;
+
+using namespace std;
+const char *color_vert_shader_path = "shaders/color_vert.glsl";
+const char *color_frag_shader_path = "shaders/color_frag.glsl";
+
+void ColoredCube::draw(Transform *transformer) {
+    shader->use();
+
+    int transformLoc = glGetUniformLocation(shader->getProgram(), "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformer->getTransformMatrix()));
+
+    vertexBuffer->bind();
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+}
+
+auto vertexAttribSetter = []() {
+    //Position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
+    glEnableVertexAttribArray(0);
+    //Color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+};
+
+std::unique_ptr<Shader> ColoredCube::shader = nullptr;
+
+ColoredCube::ColoredCube(std::array<float, 18> colors, float length, float width, float height):
+length(length), width(width), height(height) {
+    if (!shader) {
+        shader = make_unique<Shader>(color_vert_shader_path, color_frag_shader_path);
+    }
+    float x = 0.5 * length, y = 0.5 * height, z = 0.5 * width;
+
+    float vertices[] = {
+            -x, -y, -z, colors[0], colors[1], colors[2],
+            x, -y, -z, colors[0], colors[1], colors[2],
+            x, y, -z, colors[0], colors[1], colors[2],
+            x, y, -z, colors[0], colors[1], colors[2],
+            -x, y, -z, colors[0], colors[1], colors[2],
+            -x, -y, -z, colors[0], colors[1], colors[2],
+
+            -x, -y, z, colors[3], colors[4], colors[5],
+            x, -y, z, colors[3], colors[4], colors[5],
+            x, y, z, colors[3], colors[4], colors[5],
+            x, y, z, colors[3], colors[4], colors[5],
+            -x, y, z, colors[3], colors[4], colors[5],
+            -x, -y, z, colors[3], colors[4], colors[5],
+
+            -x, y, z, colors[6], colors[7], colors[8],
+            -x, y, -z, colors[6], colors[7], colors[8],
+            -x, -y, -z, colors[6], colors[7], colors[8],
+            -x, -y, -z, colors[6], colors[7], colors[8],
+            -x, -y, z, colors[6], colors[7], colors[8],
+            -x, y, z, colors[6], colors[7], colors[8],
+
+            x, y, z, colors[9], colors[10], colors[11],
+            x, y, -z, colors[9], colors[10], colors[11],
+            x, -y, -z, colors[9], colors[10], colors[11],
+            x, -y, -z, colors[9], colors[10], colors[11],
+            x, -y, z, colors[9], colors[10], colors[11],
+            x, y, z, colors[9], colors[10], colors[11],
+
+            -x, -y, -z, colors[12], colors[13], colors[14],
+            x, -y, -z, colors[12], colors[13], colors[14],
+            x, -y, z, colors[12], colors[13], colors[14],
+            x, -y, z, colors[12], colors[13], colors[14],
+            -x, -y, z, colors[12], colors[13], colors[14],
+            -x, -y, -z, colors[12], colors[13], colors[14],
+
+            -x, y, -z, colors[15], colors[16], colors[17],
+            x, y, -z, colors[15], colors[16], colors[17],
+            x, y, z, colors[15], colors[16], colors[17],
+            x, y, z, colors[15], colors[16], colors[17],
+            -x, y, z, colors[15], colors[16], colors[17],
+            -x, y, -z, colors[15], colors[16], colors[17],
+    };
+    vertexBuffer = make_unique<Utils::VertexBuffer>(sizeof(vertices), vertices, vertexAttribSetter);
+}
