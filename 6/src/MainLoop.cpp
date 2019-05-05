@@ -73,7 +73,9 @@ void MainLoop::loop(GLFWwindow *window) {
                     if (cube.getCurrent() != cube.GOURAUD && ImGui::MenuItem("GOUROUD")) {
                         cube.setCurrent(cube.GOURAUD);
                     }
-
+                    if (cube.getCurrent() != cube.BLINN_PHONG && ImGui::MenuItem("BLINN PHONG")) {
+                        cube.setCurrent(cube.BLINN_PHONG);
+                    }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();

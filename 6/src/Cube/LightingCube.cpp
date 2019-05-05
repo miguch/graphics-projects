@@ -67,6 +67,9 @@ LightingCube::LightingCube(glm::vec3 colors, float length, float width, float he
     if (!shaders.count(GOURAUD)) {
         shaders[GOURAUD] = make_unique<Shader>(gouroud_vert_shader_path, gouroud_frag_shader_path);
     }
+    if (!shaders.count(BLINN_PHONG)) {
+        shaders[BLINN_PHONG] = make_unique<Shader>(blinn_phong_vert_shader_path, blinn_phong_frag_shader_path);
+    }
 
     float vertices[] = {
             -x, -y, -z, 0.0f, 0.0f, -1.0f,
@@ -141,6 +144,9 @@ LightingCube::LightingCube(glm::vec3 colors, std::shared_ptr<Utils::VertexBuffer
     }
     if (!shaders.count(GOURAUD)) {
         shaders[GOURAUD] = make_unique<Shader>(gouroud_vert_shader_path, gouroud_frag_shader_path);
+    }
+    if (!shaders.count(BLINN_PHONG)) {
+        shaders[BLINN_PHONG] = make_unique<Shader>(blinn_phong_vert_shader_path, blinn_phong_frag_shader_path);
     }
 }
 

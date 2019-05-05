@@ -19,7 +19,7 @@ public:
     const std::unique_ptr<Utils::VertexArrayBuffer> &getVertexBuffer() const;
 
     enum Mode {
-        GOURAUD, PHONG
+        GOURAUD, PHONG, BLINN_PHONG
     };
 private:
     static std::unordered_map<Mode, std::unique_ptr<Shader>> shaders;
