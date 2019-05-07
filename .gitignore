@@ -10,3 +10,4 @@ Makefile
 
 
 .vscode
+cmake-build-debug
