@@ -11,7 +11,8 @@ Makefile
 !*/doc/screenshoot
 !*/doc/*.tex
 !*/doc/*.pdf
-
+!*/doc/*.mp4
+!*/doc/*.gif
 .vscode
 cmake-build-debug
 *.cbp
