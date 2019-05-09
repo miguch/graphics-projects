@@ -29,6 +29,16 @@ public:
 
     glm::mat4 getViewMatrix();
 
+    void setCameraPos(const glm::vec3 &cameraPos);
+
+    const glm::vec3 &getCameraPos() const;
+
+    glm::vec3 getCameraFront() const;
+
+    glm::vec3 getTarget() const;
+
+    void setTarget(const glm::vec3& target);
+
     glm::mat4 getProjectionMatrix();
 
     explicit Camera(GLFWwindow *window);
@@ -39,12 +49,14 @@ public:
 
     void setUsingMouse(bool b);
 
+    glm::mat4 getLookAt();
+
     float speed;
     float mouseSensetivity;
 private:
     GLfloat pfov, pratio, pnear, pfar;
     glm::vec3 cameraPos;
-    glm::vec3 cameraFront;
+    glm::vec3 target;
     glm::vec3 cameraRight;
     glm::vec3 cameraUp;
     GLFWwindow *window;

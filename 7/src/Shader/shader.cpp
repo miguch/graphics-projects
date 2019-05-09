@@ -75,7 +75,7 @@ void Shader::use() const {
     glUseProgram(programId);
 }
 
-GLuint Shader::getProgram() {
+GLuint Shader::getProgram() const {
     return programId;
 }
 

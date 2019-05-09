@@ -18,44 +18,11 @@ class Transform {
 public:
     virtual TransformMatrix getTransformMatrix() = 0;
 
+    virtual glm::mat4 getModel() = 0;
+
     virtual ~Transform() = default;
 };
 
-
-class Static : public Transform {
-public:
-    TransformMatrix getTransformMatrix() override;
-
-};
-
-class Translation : public Transform {
-private:
-    float movingLength = 0.5;
-public:
-    bool horizontal = true, vertical = false;
-
-    void setMovingLength(float n);
-
-    TransformMatrix getTransformMatrix() override;
-
-    Translation(float movingLength = 0.5);
-};
-
-class Rotation : public Transform {
-public:
-    TransformMatrix getTransformMatrix() override;
-
-    Rotation(glm::vec3 axis = glm::vec3(1.0f, 0.0f, 1.0f));
-
-private:
-    glm::vec3 axis;
-};
-
-class ScalingCube : public Transform {
-public:
-    TransformMatrix getTransformMatrix() override;
-
-};
 
 class CombinedTransform : public Transform {
 public:
@@ -63,11 +30,12 @@ public:
 
     CombinedTransform(glm::vec3 rotateAxis, glm::vec3 scale, glm::vec3 translate);
 
+    glm::mat4 getModel() override;
+
 private:
     glm::vec3 rotateAxis, scale, translate;
     float rotationSpeed;
     float posValue, lastTime;
-    glm::vec3 cameraPos, cameraFront;
 public:
     const glm::vec3 &getRotateAxis() const;
 
@@ -88,14 +56,6 @@ public:
     float getLastTime() const;
 
     void setLastTime(float lastTime);
-
-    const glm::vec3 &getCameraPos() const;
-
-    void setCameraPos(const glm::vec3 &cameraPos);
-
-    const glm::vec3 &getCameraFront() const;
-
-    void setCameraFront(const glm::vec3 &cameraFront);
 
     void setRotationSpeed(float rotationSpeed);
 
@@ -141,28 +101,6 @@ public:
     PerspectiveTransform(float fovy_degree, float aspect, float zNear, float zFar);
 
     float fovy_degree, aspect, zNear, zFar;
-};
-
-class ViewChangeTransform : public Transform {
-private:
-
-public:
-    TransformMatrix getTransformMatrix() override;
-
-    ViewChangeTransform();
-
-    int axis;
-};
-
-class MovingCamTransform : public Transform {
-private:
-
-public:
-    TransformMatrix getTransformMatrix() override;
-
-    explicit MovingCamTransform(const Camera &cam);
-
-    Camera cam;
 };
 
 #endif //TRANSFORMATION_TRANSFORMATION_H

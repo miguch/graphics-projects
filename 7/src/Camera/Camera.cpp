@@ -10,19 +10,27 @@
 using namespace std;
 
 void Camera::moveForward(GLfloat const distance) {
-    cameraPos += distance * cameraFront;
+    auto moveDist = distance * getCameraFront();
+    cameraPos += moveDist;
+    target += moveDist;
 }
 
 void Camera::moveBack(GLfloat const distance) {
-    cameraPos -= distance * cameraFront;
+    auto moveDist = distance * getCameraFront();
+    cameraPos -= moveDist;
+    target -= moveDist;
 }
 
 void Camera::moveRight(GLfloat const distance) {
-    cameraPos += distance * glm::normalize(glm::cross(cameraFront, cameraUp));
+    auto moveDist = distance * glm::normalize(glm::cross(getCameraFront(), cameraUp));
+    cameraPos += moveDist;
+    target += moveDist;
 }
 
 void Camera::moveLeft(GLfloat const distance) {
-    cameraPos -= distance * glm::normalize(glm::cross(cameraFront, cameraUp));
+    auto moveDist = distance * glm::normalize(glm::cross(getCameraFront(), cameraUp));
+    cameraPos -= moveDist;
+    target -= moveDist;
 }
 
 void Camera::eulerRotate(GLfloat delta_pitch, GLfloat delta_yaw) {
@@ -38,11 +46,12 @@ void Camera::eulerRotate(GLfloat delta_pitch, GLfloat delta_yaw) {
     front.x = cos(glm::radians(current_euler.x)) * cos(glm::radians(current_euler.y));
     front.y = sin(glm::radians(current_euler.x));
     front.z = cos(glm::radians(current_euler.x)) * sin(glm::radians(current_euler.y));
-    cameraFront = glm::normalize(front);
+
+    auto frontDist = glm::length(target - cameraPos);
+    this->target = cameraPos + glm::normalize(front) * frontDist;
 }
 
 glm::mat4 Camera::getViewMatrix() {
-    auto target = cameraPos + cameraFront;
     return glm::lookAt(cameraPos, target, cameraUp);
 }
 
@@ -88,9 +97,9 @@ Camera::Camera(GLFWwindow *window) {
     pnear = 0.01;
     pfar = 100.0;
     cameraPos = glm::vec3(0, 0, 10);
-    cameraFront = glm::vec3(0, 0, -1);
+    setTarget(glm::vec3(0, 0, 0));
     cameraUp = glm::vec3(0, 1, 0);
-    cameraRight = glm::normalize(glm::cross(cameraUp, cameraFront));
+    cameraRight = glm::normalize(glm::cross(cameraUp, getCameraFront()));
     speed = 5;
     this->window = window;
     useMouse = false;
@@ -115,5 +124,32 @@ void Camera::setUsingMouse(bool b) {
 
 bool Camera::usingMouse() {
     return useMouse;
+}
+
+const glm::vec3 &Camera::getCameraPos() const {
+    return cameraPos;
+}
+
+glm::vec3 Camera::getTarget() const {
+    return target;
+}
+
+void Camera::setCameraPos(const glm::vec3 &cameraPos) {
+    Camera::cameraPos = cameraPos;
+}
+
+void Camera::setTarget(const glm::vec3& target) {
+    auto dir = glm::normalize(target - cameraPos);
+    current_euler.x = glm::degrees(atan2(dir.y, sqrt(dir.x * dir.x + dir.z * dir.z)));
+    current_euler.y = glm::degrees(atan2(dir.z, dir.x));
+    this->target = target;
+}
+
+glm::mat4 Camera::getLookAt() {
+    return glm::lookAt(cameraPos, getTarget(), glm::vec3(0, 1, 0));
+}
+
+glm::vec3 Camera::getCameraFront() const {
+    return glm::normalize(target - cameraPos);
 }
 

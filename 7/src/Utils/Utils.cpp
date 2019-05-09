@@ -149,4 +149,28 @@ namespace Utils {
     void VertexArrayObject::setAttrib(const std::function<void()> &vertexAttribCallback) {
         vertexAttribCallback();
     }
+
+    FrameBuffer::~FrameBuffer() {
+        glDeleteFramebuffers(1, &FBO);
+    }
+
+    FrameBuffer::FrameBuffer() {
+        glGenFramebuffers(1, &FBO);
+    }
+
+    void FrameBuffer::bind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    }
+
+    void FrameBuffer::unbind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    glm::mat4 OrthoParam::mat() {
+        return glm::ortho(left, right, bottom, top, zNear, zFar);
+    }
+
+    glm::mat4 PerspectiveParam::mat() {
+        return glm::perspective(fovy, aspect, zNear, zFar);
+    }
 }

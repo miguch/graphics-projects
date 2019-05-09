@@ -21,16 +21,17 @@ public:
                     const glm::vec3 &lightPos,
                     const glm::vec3 &viewPos);
 
-    void draw(Transform *transformer) override;
+    void drawWithMat(const TransformMatrix& matrix) override;
+
+    void putElements() override;
 
     Lighting lighting;
 
-private:
-    Shader &shader;
-public:
     void setShader(Shader &shader);
 
-private:
+protected:
+    virtual void initPoints(const std::array<glm::vec3, 4> &points, const glm::vec3 &normal);
+    Shader &shader;
     std::unique_ptr<Utils::VertexArrayBuffer> vertexBuffer;
     std::unique_ptr<Utils::ElementBuffer> elementBuffer;
 };

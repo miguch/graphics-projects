@@ -6,10 +6,18 @@
 #define CAMERA_BASECUBE_H
 
 #include "Transformation/Transformation.h"
+#include "../Shader/shader.h"
 
 class BaseObject {
 public:
-    virtual void draw(Transform *transformer) = 0;
+    virtual void draw(Transform *transformer) {
+        drawWithMat(transformer->getTransformMatrix());
+    }
+
+    virtual void drawWithMat(const TransformMatrix& matrix) = 0;
+
+    // draw elements without setting shader and matrix
+    virtual void putElements() = 0;
 
     virtual ~BaseObject() = default;
 };

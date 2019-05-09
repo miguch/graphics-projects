@@ -55,167 +55,12 @@ PerspectiveTransform::PerspectiveTransform(float fovy_degree, float aspect, floa
 
 }
 
-ViewChangeTransform::ViewChangeTransform() {
-    axis = 1;
-}
-
-TransformMatrix ViewChangeTransform::getTransformMatrix() {
-    GLuint width, height;
-    tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    glm::mat4 view(1.0);
-
-    float radius = 10;
-    float cam_1 = sin(glfwGetTime()) * radius;
-    float cam_2 = cos(glfwGetTime()) * radius;
-    glm::vec3 camera_pos, up;
-    switch (axis) {
-        case 0:
-            camera_pos = glm::vec3(0, cam_1, cam_2);
-            up = glm::vec3(0, cam_2 > 0 ? 1 : -1, 0);
-            break;
-        case 1:
-            camera_pos = glm::vec3(cam_1, 0, cam_2);
-            up = glm::vec3(0, 1, 0);
-            break;
-        case 2:
-            camera_pos = glm::vec3(cam_1, cam_2, 0);
-            up = glm::vec3(cam_2 > 0 ? 1 : -1, 0, 0);
-            break;
-        default:
-            throw Utils::GLToolsException("Unexpected Camera Axis");
-    }
-
-    //set camera
-    view *= glm::lookAt(camera_pos,
-                        glm::vec3(0.0f, 0.0f, 0.0f),
-                        up);
-    glm::mat4 projection(1.0);
-    projection = glm::perspective(glm::radians(45.0f), float(width) / height, 0.1f, 100.0f);
-
-
-    return toTransformMatrix(model, view, projection);
-}
-
-MovingCamTransform::MovingCamTransform(const Camera &cam) : cam(cam) {
-
-}
-
-TransformMatrix MovingCamTransform::getTransformMatrix() {
-    GLuint width, height;
-    tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    cam.processInput();
-    //set camera
-    auto view = cam.getViewMatrix(), projection = cam.getProjectionMatrix();
-
-    return toTransformMatrix(model, view, projection);
-}
-
-
-TransformMatrix Static::getTransformMatrix() {
-    GLuint width, height;
-    tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    glm::mat4 view(1.0);
-    view = glm::translate(view, glm::vec3(0, 0.0, 0.0));
-
-    //set camera
-    view *= glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
-                        glm::vec3(0.0f, 0.0f, 0.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection(1.0);
-    projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
-
-    return toTransformMatrix(model, view, projection);
-}
-
-TransformMatrix Translation::getTransformMatrix() {
-    GLuint width, height;
-    tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    glm::mat4 view(1.0);
-    float x = 0, y = 0;
-    if (horizontal) {
-        x = sin((float) glfwGetTime()) * movingLength;
-    }
-    if (vertical) {
-        y = cos(float(glfwGetTime())) * movingLength;
-    }
-    view = glm::translate(view, glm::vec3(x, y, 0));
-
-    //set camera
-    view *= glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
-                        glm::vec3(0.0f, 0.0f, 0.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection(1.0);
-    projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
-
-    return toTransformMatrix(model, view, projection);
-}
-
-void Translation::setMovingLength(float n) {
-    movingLength = n;
-}
-
-Translation::Translation(float movingLength) : movingLength(movingLength) {}
-
-TransformMatrix Rotation::getTransformMatrix() {
-    GLuint width, height;
-    tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    auto weight = static_cast<float>(fmod(float(glfwGetTime()), 3.6));
-    model = glm::rotate(model, glm::radians(weight * 100.0f), axis);
-    glm::mat4 view(1.0);
-    view = glm::translate(view, glm::vec3(0, 0.0, 0));
-
-    //set camera
-    view *= glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
-                        glm::vec3(0.0f, 0.0f, 0.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection(1.0);
-    projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
-
-    return toTransformMatrix(model, view, projection);
-}
-
-Rotation::Rotation(glm::vec3 axis) : axis(axis) {
-
-}
-
-TransformMatrix ScalingCube::getTransformMatrix() {
-    GLuint width, height;
-    tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    //[0.2, 2]
-    auto factor = static_cast<float>((sin(glfwGetTime()) + 1) * 0.9 + 0.2);
-    model = glm::scale(model, glm::vec3(factor, factor, factor));
-    glm::mat4 view(1.0);
-    view = glm::translate(view, glm::vec3(0, 0.0, 0.0));
-
-    //set camera
-    view *= glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
-                        glm::vec3(0.0f, 0.0f, 0.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection(1.0);
-    projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
-
-    return toTransformMatrix(model, view, projection);
-}
 
 TransformMatrix EllipseTransform::getTransformMatrix() {
     GLuint width, height;
     tie(width, height) = Utils::getScreenSize();
     glm::mat4 model(1.0);
     auto weight = static_cast<float>(fmod(float(glfwGetTime()), 3.6));
-    model = glm::rotate(model, glm::radians(weight * 100.0f), glm::vec3(0, 0, 1));
-
-    glm::mat4 view(1.0);
 
     if (dynamicSpeed) {
         auto deltaTime = static_cast<float>(glfwGetTime() - time);
@@ -230,11 +75,14 @@ TransformMatrix EllipseTransform::getTransformMatrix() {
         }
         time = glfwGetTime();
     }
-
-    x = cos(posValue) * a;
+        x = cos(posValue) * a;
     y = sin(posValue) * b;
-    view = glm::translate(view, glm::vec3(x, y, 0.0));
+    model = glm::translate(model, glm::vec3(x, y, 0.0));
+    model = glm::rotate(model, glm::radians(weight * 100.0f), glm::vec3(0, 0, 1));
 
+
+
+    glm::mat4 view(1.0);
     //set camera
     view *= glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
                         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -263,28 +111,18 @@ CombinedTransform::CombinedTransform(glm::vec3 rotateAxis, glm::vec3 scale, glm:
     lastTime = glfwGetTime();
     pause = false;
     posValue = 0;
-    cameraPos = glm::vec3(0, 0, 10);
-    cameraFront = glm::vec3(0, 0, 0);
 }
 
 TransformMatrix CombinedTransform::getTransformMatrix() {
     GLuint width, height;
     tie(width, height) = Utils::getScreenSize();
-    glm::mat4 model(1.0);
-    if (!pause) {
-        posValue += glfwGetTime() - lastTime;
-    }
-    lastTime = glfwGetTime();
-    auto weight = static_cast<float>(fmod(posValue * rotationSpeed, 3.6));
-    model = glm::rotate(model, glm::radians(weight * 100.0f), rotateAxis);
+    auto model = getModel();
 
-    model = glm::scale(model, scale);
     glm::mat4 view(1.0);
-    view = glm::translate(view, translate);
 
     //set camera
-    view *= glm::lookAt(cameraPos,
-                        cameraFront,
+    view *= glm::lookAt(glm::vec3(0, 0, 10),
+                        glm::vec3(0, 0, 0),
                         glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection(1.0);
     projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
@@ -340,20 +178,18 @@ void CombinedTransform::setLastTime(float lastTime) {
     CombinedTransform::lastTime = lastTime;
 }
 
-const glm::vec3 &CombinedTransform::getCameraPos() const {
-    return cameraPos;
-}
+glm::mat4 CombinedTransform::getModel() {
+    glm::mat4 model(1.0);
+    if (!pause) {
+        posValue += glfwGetTime() - lastTime;
+    }
+    lastTime = glfwGetTime();
+    auto weight = static_cast<float>(fmod(posValue * rotationSpeed, 3.6));
 
-void CombinedTransform::setCameraPos(const glm::vec3 &cameraPos) {
-    CombinedTransform::cameraPos = cameraPos;
-}
-
-const glm::vec3 &CombinedTransform::getCameraFront() const {
-    return cameraFront;
-}
-
-void CombinedTransform::setCameraFront(const glm::vec3 &cameraFront) {
-    CombinedTransform::cameraFront = cameraFront;
+    model = glm::scale(model, scale);
+    model = glm::translate(model, translate);
+    model = glm::rotate(model, glm::radians(weight * 100.0f), rotateAxis);
+    return model;
 }
 
 TransformMatrix::TransformMatrix(glm::mat4 model, glm::mat4 view, glm::mat4 projection) {

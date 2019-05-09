@@ -25,7 +25,7 @@ public:
 
     void use() const;
 
-    GLuint getProgram();
+    GLuint getProgram() const;
 
     void setBool(const std::string &name, bool value) const;
 

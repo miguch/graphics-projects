@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Utils {
     void disableDepthTest();
@@ -26,6 +27,15 @@ namespace Utils {
 
     void printVec3(const glm::vec3 &vec);
 
+    struct OrthoParam {
+        float left, right, bottom, top, zNear, zFar;
+        glm::mat4 mat();
+    };
+
+    struct PerspectiveParam {
+        float fovy, aspect, zNear, zFar;
+        glm::mat4 mat();
+    };
 
     struct VertexBufferObject {
         VertexBufferObject(int size, float *data);
@@ -79,6 +89,26 @@ namespace Utils {
 
         GLuint getVBO();
     };
+
+
+
+    struct FrameBuffer {
+        GLuint FBO;
+
+        FrameBuffer();
+
+        void bind();
+
+        void unbind();
+
+        FrameBuffer(const FrameBuffer &) = delete;
+
+        ~FrameBuffer();
+    };
+
+
+
+
 
     class GLToolsException : public std::exception {
     private:

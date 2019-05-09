@@ -17,10 +17,9 @@ auto vertexAttribSetter = []() {
     glEnableVertexAttribArray(1);
 };
 
-void LightingCube::draw(Transform *transformer) {
+void LightingCube::drawWithMat(const TransformMatrix& transform) {
     shader.use();
 
-    auto transform = transformer->getTransformMatrix();
     shader.setMat4("model", transform.model);
     shader.setMat4("projection", transform.projection);
     shader.setMat4("view", transform.view);
@@ -99,6 +98,11 @@ const unique_ptr<Utils::VertexArrayBuffer> &LightingCube::getVertexBuffer() cons
 
 void LightingCube::setShader(Shader &shader) {
     LightingCube::shader = shader;
+}
+
+void LightingCube::putElements() {
+    vertexBuffer->bind();
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 

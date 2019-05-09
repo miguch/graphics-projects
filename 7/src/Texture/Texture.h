@@ -6,6 +6,7 @@
 #define TRANSFORMATION_TEXTURE_H
 
 #include <glad/glad.h>
+#include "../Shader/shader.h"
 
 class Texture {
 private:
