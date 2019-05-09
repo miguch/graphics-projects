@@ -78,7 +78,7 @@ void MainLoop::loop(GLFWwindow *window) {
     surface.lighting.ambientStrength = 0.25;
     surface.lighting.diffuseStrength = 0.3;
 
-    ShadowMapping shadow(2048, 2048);
+    ShadowMapping shadow(4096, 4096);
 
     Camera cam(window);
     cam.setCameraPos(cameraPos);
@@ -127,6 +127,7 @@ void MainLoop::loop(GLFWwindow *window) {
             surface.putElements();
         }, lightSpaceMat);
 
+
         object.setShadow(shadow.getDepthMap(), lightSpaceMat);
         rotatingObject.setShadow(shadow.getDepthMap(), lightSpaceMat);
         surface.setShadow(shadow.getDepthMap(), lightSpaceMat);
@@ -135,9 +136,6 @@ void MainLoop::loop(GLFWwindow *window) {
         object.drawWithMat(TransformMatrix(objectModel, view, projection));
         rotatingObject.drawWithMat(TransformMatrix(rotatingModel, view, projection));
         surface.drawWithMat(TransformMatrix(surfaceModel, view, projection));
-
-
-        shadow.bindDepthMap();
 
         {
             if (ImGui::BeginMainMenuBar()) {
@@ -156,10 +154,11 @@ void MainLoop::loop(GLFWwindow *window) {
                 Utils::disableDepthTest();
             }
 
-            ImGui::SliderFloat("AmbientStrength", &surface.lighting.ambientStrength, 0, 1);
-            ImGui::SliderFloat("DiffuseStrength", &surface.lighting.diffuseStrength, 0, 1);
-            ImGui::SliderFloat("SpecularStrength", &surface.lighting.specularStrength, 0, 1);
-            ImGui::SliderInt("Shininess", &surface.lighting.shininess, 2, 512);
+            static bool pcf = true, useBias = true;
+            ImGui::Checkbox("PCF", &pcf);
+            ShadowMapping::getObjectShader().setBool("pcf", pcf);
+            ImGui::Checkbox("Bias", &useBias);
+            ShadowMapping::getObjectShader().setBool("useBias", useBias);
 
             ImGui::SliderFloat("Source X", (float *) &sourceMovement.getTranslate().x, -5, 5);
             ImGui::SliderFloat("Source Y", (float *) &sourceMovement.getTranslate().y, -0.2, 5);
@@ -175,6 +174,7 @@ void MainLoop::loop(GLFWwindow *window) {
             if (shadow.mode == shadow.Perspective && ImGui::Button("Shadow Ortho")) {
                 shadow.mode = shadow.Ortho;
             }
+
 
             ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);

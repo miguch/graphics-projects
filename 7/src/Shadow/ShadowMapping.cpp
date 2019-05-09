@@ -5,8 +5,8 @@
 #include "ShadowMapping.h"
 
 ShadowMapping::ShadowMapping(unsigned int width, unsigned int height) : width(width), height(height) {
-    perspective = {glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f};
-    ortho = {-10, 10, -10, 10, -10, 10};
+    perspective = {glm::radians(45.0f), float(width) / float(height), 0.1, 100.0f};
+    ortho = {-10, 10, -10, 10, -20, 20};
 
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);

@@ -7,7 +7,10 @@ lib
 cmake_install.cmake
 Makefile
 .idea
-
+*/doc/*
+!*/doc/screenshoot
+!*/doc/*.tex
+!*/doc/*.pdf
 
 .vscode
 cmake-build-debug

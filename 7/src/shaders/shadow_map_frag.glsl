@@ -19,28 +19,42 @@ uniform sampler2D objectTex;
 uniform sampler2D shadowMap;
 
 uniform bool useTexture;
+uniform bool pcf;
+uniform bool useBias;
+
 
 float calculateShadow(vec4 fragPosLightSpace) {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float closeDepth = texture(shadowMap, projCoords.xy).r;
+
     // Depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     vec3 normal = normalize(normal);
     vec3 lightDir = normalize(lightPos - FragPos);
 
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-
-    float shadow = 0;
-    vec2 texelSize = 1 / textureSize(shadowMap, 0);
-    for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;
-        }
+    float thetaCos = dot(normal, lightDir);
+    float bias = 0;
+    if (useBias) {
+        bias = max(0.05 * (1.0 - thetaCos), 0.005);
     }
 
-    shadow /= 9.0f;
+    float shadow = 0;
+
+    if (pcf) {
+        vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+        for (int x = -1; x <= 1; ++x) {
+            for (int y = -1; y <= 1; ++y) {
+                float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+
+                shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;
+            }
+        }
+
+        shadow /= 9.0f;
+    } else {
+        shadow = currentDepth - bias > closeDepth  ? 1.0 : 0.0;
+    }
 
     // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
     if(projCoords.z > 1.0) {
