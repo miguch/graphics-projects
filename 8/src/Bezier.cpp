@@ -14,10 +14,10 @@ Bezier::Bezier(std::vector<glm::vec3> points) {
 }
 
 
-std::vector<float> Bezier::getCurve(int steps) {
+std::vector<glm::vec3> Bezier::getCurve(int steps) {
     float t_step = 1.0 / steps;
     int n = points.size() - 1;
-    std::vector<float> result;
+    std::vector<glm::vec3> result;
     if (animating && glfwGetTime() - startTimeValue < animationTime) {
         steps = (glfwGetTime() - startTimeValue) / animationTime * steps;
     }
@@ -25,9 +25,9 @@ std::vector<float> Bezier::getCurve(int steps) {
     for (int k = 0; k <= steps; k++) {
         glm::vec3 current_point = {0, 0, 0};
         for (int i = 0; i <= n; i++) {
-            current_point += points[i] * bernstein(i, n, t_step * k);
+            current_point += points[i] * float(bernstein(i, n, t_step * k));
         }
-        result.insert(result.end(), &current_point.x, &current_point.x + 3);
+        result.push_back(current_point);
     }
     return result;
 }
@@ -41,8 +41,8 @@ int factorial(unsigned int n) {
     return cache[n];
 }
 
-float Bezier::bernstein(unsigned int i, unsigned int n, float t) {
-    return float(factorial(n) / (factorial(i) * factorial(n - i))) * pow(t, i) * pow(1 - t, n - i);
+double Bezier::bernstein(unsigned int i, unsigned int n, float t) {
+    return double(factorial(n) / (factorial(i) * factorial(n - i))) * pow(t, i) * pow(1 - t, n - i);
 }
 
 void Bezier::addPoint(glm::vec3 point) {
@@ -80,20 +80,21 @@ std::vector<glm::vec3> Bezier::getAnimationLines() {
         for (int i = 0; i < toInterpolate.size() - 1; i++) {
             glm::vec3 first, second;
             std::tie(first, second) = toInterpolate[i];
-            first *= 1 - animatePart;
-            second *= animatePart;
-            glm::vec3 next_a = first + second;
+            glm::vec3 next_a = first * float(1.0 - animatePart) + second * float(animatePart);
             std::tie(first, second) = toInterpolate[i + 1];
-            first *= 1 - animatePart;
-            second *= animatePart;
-            glm::vec3 next_b = first + second;
+            glm::vec3 next_b = first * float(1.0 - animatePart) + second * float(animatePart);
             nexts.emplace_back(next_a, next_b);
             result.push_back(next_a);
             result.push_back(next_b);
         }
         toInterpolate = std::move(nexts);
     }
-
+    if (result.size() >= 2) {
+        glm::vec3 start = result[result.size()-2];
+        glm::vec3 end = result[result.size()-1];
+        glm::vec3 front = start * float(1.0 - animatePart) + end * float(animatePart);
+        result.push_back(front);
+    }
 
     return result;
 }

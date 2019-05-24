@@ -20,10 +20,10 @@ public:
     // The control points
     std::vector<glm::vec3> points;
 
-    static float bernstein(unsigned int i, unsigned int n, float t);
+    static double bernstein(unsigned int i, unsigned int n, float t);
 
     // Returns all points in the curve to draw
-    std::vector<float> getCurve(int steps);
+    std::vector<glm::vec3> getCurve(int steps);
 
     std::vector<glm::vec3> getAnimationLines();
 

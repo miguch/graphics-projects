@@ -16,3 +16,4 @@ Makefile
 .vscode
 cmake-build-debug
 *.cbp
+__latexindent_temp.tex

@@ -97,31 +97,35 @@ void MainLoop::loop(GLFWwindow *window) {
 
         shader.setVec3("verColor", 1, 0.2, 0.2);
         glPointSize(5);
-        glBufferData(GL_ARRAY_BUFFER, curvePoints.size() * sizeof(float), curvePoints.data(), GL_DYNAMIC_DRAW);
-        glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size() / 3);
+        glBufferData(GL_ARRAY_BUFFER, curvePoints.size() * 3 * sizeof(float), curvePoints.data(), GL_DYNAMIC_DRAW);
+        glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size());
 
 
         if (curve.animating) {
             auto animatePoints = curve.getAnimationLines();
-            shader.setVec3("verColor", 0.2, 1, 0.2);
-            for (auto c : animatePoints) {
-                Utils::printVec3(c);
+            if (animatePoints.size() > 2) {
+                shader.setVec3("verColor", 0.2, 1, 0.2);
+                glBufferData(GL_ARRAY_BUFFER, animatePoints.size() * 3 * sizeof(float), animatePoints.data(), GL_DYNAMIC_DRAW);
+                glPointSize(6);
+                glDrawArrays(GL_POINTS, 0, animatePoints.size() - 1);
+                glDrawArrays(GL_LINES, 0, animatePoints.size() - 1);
+                glPointSize(9);
+                shader.setVec3("verColor", 0.2, 0.2, 1);
+                glDrawArrays(GL_POINTS, animatePoints.size() - 1, 1);
             }
-            cout << endl;
-            glBufferData(GL_ARRAY_BUFFER, animatePoints.size() * 3 * sizeof(float), animatePoints.data(), GL_DYNAMIC_DRAW);
-            glPointSize(6);
-            glDrawArrays(GL_POINTS, 0, animatePoints.size());
-            glDrawArrays(GL_LINES, 0, animatePoints.size());
         }
 
         {
             ImGui::Begin("window");
 
             ImGui::InputInt("Step", &steps);
+            ImGui::InputDouble("Animation Length", &curve.animationTime);
+
             if (ImGui::Button("Animate Drawing")) {
                 curve.animate();
             }
 
+            ImGui::Text("Number of Control points: %lu", curve.points.size());
             ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);
             ImGui::End();
